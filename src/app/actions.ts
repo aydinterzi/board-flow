@@ -5,7 +5,7 @@ import db from "@/db";
 import { boards, lists, cards } from "@/db/schema";
 import { revalidatePath } from "next/cache";
 import { desc } from "drizzle-orm";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 export async function createBoard(title: string) {
   const { userId } = await auth();
@@ -81,4 +81,46 @@ export async function createCard(
 
   revalidatePath(`/dashboard/boards/${boardId}`);
   return card[0];
+}
+
+export async function updateCardPosition(
+  cardId: string,
+  newListId: string,
+  newPosition: number,
+  boardId: string
+) {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+
+  // Update positions of other cards in the list
+  await db.execute(sql`
+    UPDATE cards 
+    SET position = position + 1 
+    WHERE list_id = ${newListId} 
+    AND position >= ${newPosition}
+  `);
+
+  // Update the dragged card
+  await db
+    .update(cards)
+    .set({
+      listId: newListId,
+      position: newPosition,
+    })
+    .where(eq(cards.id, cardId));
+
+  revalidatePath(`/dashboard/boards/${boardId}`);
+}
+
+export async function updateCardContent(
+  cardId: string,
+  content: string,
+  boardId: string
+) {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+
+  await db.update(cards).set({ content }).where(eq(cards.id, cardId));
+
+  revalidatePath(`/dashboard/boards/${boardId}`);
 }
