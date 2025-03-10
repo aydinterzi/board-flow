@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import db from "@/db";
-import { boards } from "@/db/schema";
+import { boards, boardMembers } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
 import CreateBoardDialog from "./CreateBoardDialog";
@@ -9,9 +9,13 @@ import CreateBoardDialog from "./CreateBoardDialog";
 async function BoardsSidebar() {
   const { userId } = await auth();
   const userBoards = await db
-    .select()
+    .select({
+      id: boards.id,
+      title: boards.title,
+    })
     .from(boards)
-    .where(eq(boards.userId, userId!));
+    .innerJoin(boardMembers, eq(boards.id, boardMembers.boardId))
+    .where(eq(boardMembers.userId, userId!));
 
   return (
     <div className="w-64 h-full bg-gray-50 border-r border-gray-200 p-4">

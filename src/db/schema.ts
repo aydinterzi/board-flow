@@ -9,8 +9,12 @@ export const boards = pgTable("boards", {
 
 export const boardMembers = pgTable("board_members", {
   id: uuid("id").primaryKey().defaultRandom(),
-  boardId: uuid("board_id").references(() => boards.id),
+  boardId: uuid("board_id")
+    .references(() => boards.id, { onDelete: "cascade" })
+    .notNull(),
   userId: text("user_id").notNull(),
+  role: text("role").notNull().default("member"), // 'owner' or 'member'
+  createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
 });
 
 export const lists = pgTable("lists", {

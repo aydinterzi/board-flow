@@ -6,6 +6,7 @@ import { updateCardPosition } from "@/app/actions";
 import CreateCardForm from "./CreateCardForm";
 import CardItem from "./CardItem";
 import type { Card, List } from "@/db/schema";
+import { useBoardSubscription } from "@/hooks/useBoardSubscription";
 
 interface DraggableBoardProps {
   lists: (List & { cards: Card[] })[];
@@ -17,6 +18,9 @@ export default function DraggableBoard({
   boardId,
 }: DraggableBoardProps) {
   const [lists, setLists] = React.useState(initialLists);
+
+  // Subscribe to real-time updates
+  useBoardSubscription(boardId);
 
   // Update lists when props change
   React.useEffect(() => {
