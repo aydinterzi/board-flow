@@ -18,6 +18,7 @@ A modern, collaborative task management platform built with Next.js, TypeScript,
   - Tailwind CSS
   - Shadcn UI
   - React DnD (Drag and Drop)
+  - Pusher.js
 
 - **Backend**:
   - DrizzleORM
